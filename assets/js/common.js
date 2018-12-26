@@ -181,6 +181,9 @@
                             html += '<span class="aws_result_sku">' + translate.sku + ': ' + result.sku + '</span>';
                         }
 
+                        if ( result.excerpt ) {
+                            html += '<span class="aws_result_excerpt">' + result.excerpt + '</span>';
+                        }
 
                         if ( result.price ) {
                             html += '<span class="aws_result_price">' + result.price + '</span>';
@@ -377,14 +380,14 @@
 
 
         $searchForm.on( 'keypress', function(e) {
-            if ( e.keyCode == 13 && ! d.showPage ) {
+            if ( e.keyCode == 13 && ( ! d.showPage || $searchField.val() === '' ) ) {
                 e.preventDefault();
             }
         });
 
 
         $searchButton.on( 'click', function (e) {
-            if ( d.showPage ) {
+            if ( d.showPage && $searchField.val() !== '' ) {
                 $searchForm.submit();
             }
         });

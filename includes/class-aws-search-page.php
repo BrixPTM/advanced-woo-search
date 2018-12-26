@@ -134,8 +134,8 @@ if ( ! class_exists( 'AWS_Search_Page' ) ) :
                     'ping_status',
                     'menu_order',
                     'permalink',
-                    'terms',                    
-					'post_meta'
+                    'terms',
+                    'post_meta'
                 );
 
                 foreach ( $post_return_args as $key ) {
@@ -158,7 +158,6 @@ if ( ! class_exists( 'AWS_Search_Page' ) ) :
             global $wpdb;
 
             return "SELECT * FROM $wpdb->posts WHERE 1=0";
-			
 
         }
 
@@ -177,7 +176,6 @@ if ( ! class_exists( 'AWS_Search_Page' ) ) :
             $new_posts = $this->posts_by_query[spl_object_hash( $query )];
 
             return $new_posts;
-			
 
         }
 
@@ -206,7 +204,6 @@ if ( ! class_exists( 'AWS_Search_Page' ) ) :
                  */
                 header( 'X-AWS-Search: true' );
             }
-			
         }
 
         /**
@@ -244,6 +241,7 @@ if ( ! class_exists( 'AWS_Search_Page' ) ) :
         }
 
     }
+
 
 endif;
 

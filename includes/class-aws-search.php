@@ -249,6 +249,7 @@ if ( ! class_exists( 'AWS_Search' ) ) :
             $query['relevance'] = '';
             $query['stock'] = '';
             $query['visibility'] = '';
+            $query['exclude_products'] = '';
             $query['lang'] = '';
 
             $search_array = array();
@@ -279,7 +280,7 @@ if ( ! class_exists( 'AWS_Search' ) ) :
 
                 $search_term_norm = preg_replace( '/(s|es|ies)$/i', '', $search_term );
 
-                if ( $search_term_norm ) {
+                if ( $search_term_norm && $search_term_len > 3 ) {
                     $search_term = $search_term_norm;
                 }
 
@@ -343,19 +344,33 @@ if ( ! class_exists( 'AWS_Search' ) ) :
                 $source_array[] = "term_source = '{$search_in_term}'";
             }
 
-            $query['relevance'] .= sprintf( ' (SUM( %s )) ', implode( ' + ', $new_relevance_array ) );
-            $query['search'] .= sprintf( ' AND ( %s )', implode( ' OR ', $search_array ) );
-            $query['source'] .= sprintf( ' AND ( %s )', implode( ' OR ', $source_array ) );
+            $query['relevance'] = sprintf( ' (SUM( %s )) ', implode( ' + ', $new_relevance_array ) );
+            $query['search'] = sprintf( ' AND ( %s )', implode( ' OR ', $search_array ) );
+            $query['source'] = sprintf( ' AND ( %s )', implode( ' OR ', $source_array ) );
 
 
             if ( $reindex_version && version_compare( $reindex_version, '1.16', '>=' ) ) {
 
                 if ( $outofstock !== 'true' ) {
-                    $query['stock'] .= " AND in_stock = 1";
+                    $query['stock'] = " AND in_stock = 1";
                 }
 
-                $query['visibility'] .= " AND NOT visibility LIKE '%hidden%'";
+                $query['visibility'] = " AND NOT visibility LIKE '%hidden%'";
 
+            }
+
+
+            /**
+             * Exclude certain products from search
+             *
+             * @since 1.58
+             *
+             * @param array
+             */
+            $exclude_products_filter = apply_filters( 'aws_exclude_products', array() );
+
+            if ( $exclude_products_filter && is_array( $exclude_products_filter ) && ! empty( $exclude_products_filter ) ) {
+                $query['exclude_products'] = sprintf( ' AND ( id NOT IN ( %s ) )', implode( ',', $exclude_products_filter ) );
             }
 
 
@@ -366,7 +381,7 @@ if ( ! class_exists( 'AWS_Search' ) ) :
             }
 
             if ( $current_lang && $reindex_version && version_compare( $reindex_version, '1.20', '>=' ) ) {
-                $query['lang'] .= $wpdb->prepare( " AND ( lang LIKE %s OR lang = '' )", $current_lang );
+                $query['lang'] = $wpdb->prepare( " AND ( lang LIKE %s OR lang = '' )", $current_lang );
             }
 
 
@@ -381,6 +396,7 @@ if ( ! class_exists( 'AWS_Search' ) ) :
                 {$query['search']}
                 {$query['stock']}
                 {$query['visibility']}
+                {$query['exclude_products']}
                 {$query['lang']}
                 GROUP BY ID
                 ORDER BY
@@ -681,6 +697,18 @@ if ( ! class_exists( 'AWS_Search' ) ) :
 
             $search_query .= sprintf( ' AND ( %s )', implode( ' OR ', $search_array ) );
 
+            /**
+             * Exclude certain terms from search
+             *
+             * @since 1.58
+             *
+             * @param array
+             */
+            $exclude_terms = apply_filters( 'aws_terms_exclude_' . $taxonomy, array() );
+
+            if ( $exclude_terms && is_array( $exclude_terms ) && ! empty( $exclude_terms ) ) {
+                $excludes = $wpdb->prepare( " AND ( " . $wpdb->terms . ".term_id NOT IN ( %s ) )", implode( ',', $exclude_terms ) );
+            }
 
             $sql = "
 			SELECT
@@ -695,8 +723,9 @@ if ( ! class_exists( 'AWS_Search' ) ) :
 				{$search_query}
 				AND $wpdb->term_taxonomy.taxonomy = '{$taxonomy}'
 				AND $wpdb->term_taxonomy.term_id = $wpdb->terms.term_id
-			$excludes
+			    {$excludes}
 			LIMIT 0, 10";
+
 
             $search_results = $wpdb->get_results( $sql );
 
@@ -740,6 +769,7 @@ if ( ! class_exists( 'AWS_Search' ) ) :
         }
 
     }
+
 
 endif;
 

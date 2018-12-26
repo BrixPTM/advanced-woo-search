@@ -1,7 +1,7 @@
 .aws-container .aws-search-form {
     position: relative;
     width: 100%;
-    float: none;
+    float: none !important;
 
     display: -webkit-box;
     display: -moz-box;
@@ -31,6 +31,7 @@
 }
 
 .aws-container .aws-search-form .aws-wrapper {
+    flex-grow: 1;
     position: relative;
     vertical-align: top;
     padding: 0;
@@ -87,6 +88,7 @@
 
 .aws-container .aws-search-field {
     width: 100%;
+    max-width: 100%;
     color: #313131;
     padding: 6px;
     line-height: 30px;
@@ -96,7 +98,7 @@
     z-index: 2;
     -webkit-appearance: none;
     height: 100%;
-    margin: 0;
+    margin: 0 !important;
     border: 1px solid #d8d8d8;
     outline: 0;
 }
@@ -123,14 +125,15 @@
 .aws-container .aws-search-form .aws-search-clear {
     display: none !important;
     position: absolute;
-    top: 48%;
-    right: 10%;
+    top: 0;
+    right: 0;
     z-index: 2;
     cursor: pointer;
     color: #757575;
     height: 100%;
     width: 38px;
     padding-left: 10px;
+    text-align: left;
 }
 .aws-container .aws-search-form .aws-search-clear span {
     position: relative;
@@ -142,7 +145,7 @@
 }
 
 .aws-container .aws-search-form.aws-show-clear.aws-form-active .aws-search-clear {
-    display: block;
+    display: block !important;
 }
 
 .aws-container .aws-search-form.aws-form-active.aws-processing .aws-search-clear {
@@ -226,7 +229,7 @@
 }
 
 .aws-search-result {
-    position: fixed;
+    position: absolute;
     text-align: left;
     z-index: 9999999999999;
     background: #fff;
